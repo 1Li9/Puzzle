@@ -28,7 +28,7 @@ public class CompositeRoot : MonoBehaviour
         foreach (Cell cell in cells.Values)
         {
             Position2 position = cell.Position;
-            Vector3 globalPosition = _positionCalculator.Calculate(_cellViewPrefab.Scale.x, _cellViewPrefab.Scale.z, position);
+            Vector3 globalPosition = _positionCalculator.ConvertToGlobal(_cellViewPrefab.Scale.x, _cellViewPrefab.Scale.z, position);
             CellView cellView = Instantiate(_cellViewPrefab, globalPosition, Quaternion.identity);
             cellView.SetCell(cell);
         }

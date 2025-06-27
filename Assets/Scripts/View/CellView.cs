@@ -24,7 +24,7 @@ public class CellView : MonoBehaviour, IPointerDownHandler
     private void ChangePosition()
     {
         Position2 localPosition = _cell.Position;
-        transform.localPosition = _positionCalculator.Calculate(Scale.x, Scale.z, localPosition);
+        transform.localPosition = _positionCalculator.ConvertToGlobal(Scale.x, Scale.z, localPosition);
     }
 
     private void OnDisable()

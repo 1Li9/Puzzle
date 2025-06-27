@@ -3,23 +3,29 @@ using UnityEngine;
 
 public class FieldFabric : MonoBehaviour
 {
+    [SerializeField] private PositionCalculator _positionCalculator;
     [SerializeField] private int _height = 4;
     [SerializeField] private int _width = 4;
+    [SerializeField] private int _scrambleSteps = 20;
+
+    private Position2 _freeCellPosition;
 
     public void Create(out Field field, out Dictionary<Position2, Cell> cells)
     {
+        _freeCellPosition = new Position2(_height - 1, _width - 1);
+
         cells = CreateCells();
+        SetRandomPositions(cells);
+
         DefaultWinCondition defaultWinCondition = new(cells);
-        field = new(cells, new Position2(_height - 1, _width - 1), defaultWinCondition);
+        field = new(cells, _freeCellPosition, defaultWinCondition);
     }
 
     private Dictionary<Position2, Cell> CreateCells()
     {
         Dictionary<Position2, Cell> cells = new();
-        List<int> numbers = new List<int>();
 
-        for (int i = 1; i < _height * _width; i++)
-            numbers.Add(i);
+        int count = 1;
 
         for (int i = 0; i < _width; i++)
         {
@@ -28,17 +34,31 @@ public class FieldFabric : MonoBehaviour
                 if ((i + 1) * (j + 1) == _height * _width)
                     return cells;
 
-                int index = Random.Range(0, numbers.Count);
-                int number = numbers[index];
-                numbers.RemoveAt(index);
-
                 Position2 position = new(j, i);
-                Cell cell = new(position, number);
+                Cell cell = new(position, count);
 
                 cells.Add(position, cell);
+
+                count++;
             }
         }
 
         return cells;
+    }
+
+    private void SetRandomPositions(Dictionary<Position2, Cell> cells)
+    {
+        for (int i = 0; i < _scrambleSteps; i++)
+        {
+            if (_positionCalculator.TryGetRandomNeighbour(cells, _freeCellPosition, out Cell neighbourCell) == false)
+                throw new System.ArgumentNullException(nameof(cells));
+
+            Position2 tempPosition = neighbourCell.Position;
+            neighbourCell.SetPosition(_freeCellPosition);
+            _freeCellPosition = tempPosition;
+
+            cells.Remove(tempPosition);
+            cells.Add(neighbourCell.Position, neighbourCell);
+        }
     }
 }
